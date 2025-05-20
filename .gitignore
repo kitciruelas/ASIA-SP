@@ -1,0 +1,6 @@
+# Track everything
+!*
+
+# But ignore these common files
+.DS_Store
+Thumbs.db 
