@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Analytics Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .metric-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        .metric-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        .metric-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            min-height: calc(100vh - 250px);
+        }
+        
+        .section {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 300px);
+            min-height: 500px;
+        }
+        
+        .section canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            transition: transform 0.3s ease-in-out;
+            z-index: 1040;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+        .main-content {
+            margin-left: 280px;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1030;
+        }
+        @media (max-width: 768px) {
+            .sidebar-overlay.show {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Mobile Navbar -->
+    <nav class="navbar navbar-expand-md d-md-none bg-white border-bottom fixed-top">
+        <div class="container-fluid">
+            <span class="navbar-brand">CHARTS DASHBOARD</span>
+            <button class="navbar-toggler" type="button" id="menuToggle">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar bg-white border-end p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h5 mb-0">CHARTS DASHBOARD</h2>
+            <button class="btn btn-sm btn-light d-md-none" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="nav flex-column">
+            <button onclick="showSection('line-chart')" class="btn btn-light text-start mb-2 d-flex align-items-center gap-2">
+                <svg class="bi" width="20" height="20" fill="currentColor">
+                    <path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+                </svg>
+                Line Chart
+            </button>
+            <button onclick="showSection('bar-chart')" class="btn btn-light text-start mb-2 d-flex align-items-center gap-2">
+                <svg class="bi" width="20" height="20" fill="currentColor">
+                    <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                Bar Chart
+            </button>
+            <button onclick="showSection('doughnut-chart')" class="btn btn-light text-start mb-2 d-flex align-items-center gap-2">
+                <svg class="bi" width="20" height="20" fill="currentColor">
+                    <path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                </svg>
+                Doughnut Chart
+            </button>
+            <button onclick="showSection('radar-chart')" class="btn btn-light text-start mb-2 d-flex align-items-center gap-2">
+                <svg class="bi" width="20" height="20" fill="currentColor">
+                    <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                Radar Chart
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content p-4">
+        <!-- Metrics Overview -->
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <div class="metric-icon bg-primary bg-opacity-10">
+                        <i class="fas fa-dollar-sign text-primary"></i>
+                    </div>
+                    <div class="metric-value" id="totalRevenue">₱0.00</div>
+                    <div class="metric-label">Total Revenue</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <div class="metric-icon bg-success bg-opacity-10">
+                        <i class="fas fa-box text-success"></i>
+                    </div>
+                    <div class="metric-value" id="totalQuantity">0</div>
+                    <div class="metric-label">Total Quantity Sold</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <div class="metric-icon bg-info bg-opacity-10">
+                        <i class="fas fa-star text-info"></i>
+                    </div>
+                    <div class="metric-value" id="trendingProduct">-</div>
+                    <div class="metric-label">Trending Product</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Container -->
+        <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h5 mb-0">Data Visualization</h2>
+                
+            </div>
+            <!-- Line Chart Section -->
+            <div id="line-chart" class="section d-none">
+                <canvas id="monthlySalesChart"></canvas>
+            </div>
+
+            <!-- Bar Chart Section -->
+            <div id="bar-chart" class="section d-none">
+                <canvas id="stockDistributionChart"></canvas>
+            </div>
+
+            <!-- Doughnut Chart Section -->
+            <div id="doughnut-chart" class="section d-none">
+                <canvas id="stockStatusChart"></canvas>
+            </div>
+
+            <!-- Radar Chart Section -->
+            <div id="radar-chart" class="section d-none">
+                <canvas id="productPerformanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-none justify-content-center align-items-center" style="z-index: 1060;">
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error" class="position-fixed bottom-0 end-0 m-3 alert alert-danger d-none" style="z-index: 1060;"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        const loadingSpinner = document.getElementById('loading');
+        const errorMessage = document.getElementById('error');
+        
+        // Store chart instances
+        const charts = {};
+
+        // Function to destroy a chart if it exists
+        function destroyChart(chartId) {
+            if (charts[chartId]) {
+                charts[chartId].destroy();
+                charts[chartId] = null;
+            }
+        }
+
+        // Show loading state
+        function showLoading() {
+            const loadingSpinner = document.getElementById('loading');
+            const errorMessage = document.getElementById('error');
+            
+            if (loadingSpinner) {
+                loadingSpinner.classList.remove('d-none');
+            }
+            if (errorMessage) {
+                errorMessage.classList.add('d-none');
+            }
+        }
+
+        // Hide loading state
+        function hideLoading() {
+            const loadingSpinner = document.getElementById('loading');
+            if (loadingSpinner) {
+                loadingSpinner.classList.add('d-none');
+            }
+        }
+
+        // Show error
+        function showError(message) {
+            const errorMessage = document.getElementById('error');
+            if (errorMessage) {
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('d-none');
+            }
+        }
+
+        // Show selected section
+        function showSection(sectionId) {
+            // Hide all sections first
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('d-none');
+            });
+            
+            // Show the selected section
+            const selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+                selectedSection.classList.remove('d-none');
+            }
+            
+            // Update active state of sidebar buttons
+            document.querySelectorAll('.nav button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Add active state to clicked button
+            const activeButton = document.querySelector(`button[onclick="showSection('${sectionId}')"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+            
+            // Load appropriate data based on the section
+            switch(sectionId) {
+                case 'line-chart':
+                    fetchSalesData();
+                    break;
+                case 'bar-chart':
+                    fetchStockData();
+                    break;
+                case 'doughnut-chart':
+                    fetchStockData();
+                    break;
+                case 'radar-chart':
+                    fetchSalesData();
+                    break;
+            }
+        }
+
+        // Fetch and display stock data
+        async function fetchStockData() {
+            showLoading();
+            try {
+                console.log('Fetching stock data...');
+                const response = await fetch(`${API_URL}/products`);
+                if (!response.ok) throw new Error('Failed to fetch stock data');
+                const responseData = await response.json();
+                
+                if (!responseData.success) {
+                    throw new Error(responseData.message || 'Failed to fetch stock data');
+                }
+
+                const products = responseData.data || [];
+                console.log('Products data:', products);
+                
+                // Destroy existing charts
+                destroyChart('stockDistributionChart');
+                destroyChart('stockStatusChart');
+                
+                // Sample data if too large (show top 20 by quantity)
+                const sampledProducts = products
+                    .sort((a, b) => (b.quantity || 0) - (a.quantity || 0))
+                    .slice(0, 20);
+                
+                // Stock Distribution Chart
+                const stockCtx = document.getElementById('stockDistributionChart');
+                if (!stockCtx) {
+                    console.error('Stock distribution chart canvas not found');
+                    return;
+                }
+                
+                // Define color scheme for bar chart
+                const barColors = [
+                    'rgba(255, 99, 132, 0.7)',     // Red
+                    'rgba(54, 162, 235, 0.7)',     // Blue
+                    'rgba(255, 206, 86, 0.7)',     // Yellow
+                    'rgba(75, 192, 192, 0.7)',     // Teal
+                    'rgba(153, 102, 255, 0.7)',    // Purple
+                    'rgba(255, 159, 64, 0.7)',     // Orange
+                    'rgba(199, 199, 199, 0.7)',    // Gray
+                    'rgba(83, 102, 255, 0.7)',     // Indigo
+                    'rgba(40, 159, 64, 0.7)',      // Green
+                    'rgba(210, 199, 199, 0.7)',    // Pink
+                    'rgba(78, 205, 196, 0.7)',     // Turquoise
+                    'rgba(255, 99, 255, 0.7)',     // Magenta
+                    'rgba(255, 159, 64, 0.7)',     // Orange
+                    'rgba(54, 162, 235, 0.7)',     // Blue
+                    'rgba(255, 206, 86, 0.7)',     // Yellow
+                    'rgba(75, 192, 192, 0.7)',     // Teal
+                    'rgba(153, 102, 255, 0.7)',    // Purple
+                    'rgba(255, 99, 132, 0.7)',     // Red
+                    'rgba(199, 199, 199, 0.7)',    // Gray
+                    'rgba(83, 102, 255, 0.7)'      // Indigo
+                ];
+
+                const barBorderColors = barColors.map(color => color.replace('0.7', '1'));
+
+                console.log('Creating stock distribution chart...');
+                charts['stockDistributionChart'] = new Chart(stockCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: sampledProducts.map(p => p.name || 'Unnamed Product'),
+                        datasets: [{
+                            label: 'Current Stock',
+                            data: sampledProducts.map(p => p.quantity || 0),
+                            backgroundColor: barColors,
+                            borderColor: barBorderColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 0
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Quantity'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Products'
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45,
+                                    callback: function(value, index) {
+                                        const label = this.getLabelForValue(value);
+                                        return label.length > 15 ? label.substr(0, 15) + '...' : label;
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Top 20 Products by Stock Level'
+                            },
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        return tooltipItems[0].label;
+                                    },
+                                    label: function(context) {
+                                        const value = context.raw || 0;
+                                        let stockLevel = '';
+                                        if (value === 0) stockLevel = ' (Out of Stock)';
+                                        else if (value <= 10) stockLevel = ' (Low Stock)';
+                                        else if (value <= 50) stockLevel = ' (Medium Stock)';
+                                        else if (value <= 100) stockLevel = ' (High Stock)';
+                                        else stockLevel = ' (Very High Stock)';
+                                        return `Quantity: ${value}${stockLevel}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                console.log('Stock distribution chart created');
+
+                // Stock Status Chart - Group by ranges
+                const statusCtx = document.getElementById('stockStatusChart');
+                if (!statusCtx) {
+                    console.error('Stock status chart canvas not found');
+                    return;
+                }
+                
+                // Define color scheme for doughnut chart
+                const doughnutColors = {
+                    'Out of Stock (0)': {
+                        bg: 'rgba(255, 99, 132, 0.7)',    // Red
+                        border: 'rgb(255, 99, 132)'
+                    },
+                    'Low Stock (1-10)': {
+                        bg: 'rgba(255, 159, 64, 0.7)',    // Orange
+                        border: 'rgb(255, 159, 64)'
+                    },
+                    'Medium Stock (11-50)': {
+                        bg: 'rgba(255, 205, 86, 0.7)',    // Yellow
+                        border: 'rgb(255, 205, 86)'
+                    },
+                    'High Stock (51-100)': {
+                        bg: 'rgba(75, 192, 192, 0.7)',    // Teal
+                        border: 'rgb(75, 192, 192)'
+                    },
+                    'Very High Stock (>100)': {
+                        bg: 'rgba(54, 162, 235, 0.7)',    // Blue
+                        border: 'rgb(54, 162, 235)'
+                    }
+                };
+
+                // Group products by stock level ranges
+                const stockRanges = {
+                    'Out of Stock (0)': 0,
+                    'Low Stock (1-10)': 0,
+                    'Medium Stock (11-50)': 0,
+                    'High Stock (51-100)': 0,
+                    'Very High Stock (>100)': 0
+                };
+                
+                products.forEach(p => {
+                    const quantity = p.quantity || 0;
+                    if (quantity === 0) stockRanges['Out of Stock (0)']++;
+                    else if (quantity <= 10) stockRanges['Low Stock (1-10)']++;
+                    else if (quantity <= 50) stockRanges['Medium Stock (11-50)']++;
+                    else if (quantity <= 100) stockRanges['High Stock (51-100)']++;
+                    else stockRanges['Very High Stock (>100)']++;
+                });
+
+                // Create the doughnut chart
+                charts['stockStatusChart'] = new Chart(statusCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(stockRanges),
+                        datasets: [{
+                            data: Object.values(stockRanges),
+                            backgroundColor: Object.keys(stockRanges).map(key => doughnutColors[key].bg),
+                            borderColor: Object.keys(stockRanges).map(key => doughnutColors[key].border),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 0
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    generateLabels: function(chart) {
+                                        const data = chart.data;
+                                        return data.labels.map((label, i) => ({
+                                            text: `${label}: ${data.datasets[0].data[i]} products`,
+                                            fillStyle: doughnutColors[label].bg,
+                                            strokeStyle: doughnutColors[label].border,
+                                            lineWidth: 1
+                                        }));
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Stock Level Distribution'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                        return `${label}: ${value} products (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                console.log('Stock status chart created');
+            } catch (error) {
+                showError('Error loading stock data. Please try again later.');
+                console.error('Error:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Fetch and display sales data
+        async function fetchSalesData() {
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}/sales`);
+                if (!response.ok) throw new Error('Failed to fetch sales data');
+                const responseData = await response.json();
+                
+                // Destroy existing charts
+                destroyChart('monthlySalesChart');
+                destroyChart('productPerformanceChart');
+                
+                // Monthly Sales Chart
+                const monthlyCtx = document.getElementById('monthlySalesChart').getContext('2d');
+                charts['monthlySalesChart'] = new Chart(monthlyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: responseData.data.map(sale => new Date(sale.sale_date).toLocaleDateString()),
+                        datasets: [{
+                            label: 'Sales Amount',
+                            data: responseData.data.map(sale => sale.total_amount),
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                // Product Performance Chart
+                const performanceCtx = document.getElementById('productPerformanceChart').getContext('2d');
+
+                // Process and aggregate sales data for radar chart
+                const productPerformance = {};
+                const sales = responseData.data || [];
+                const products = responseData.data.map(sale => ({
+                    product_id: sale.product_id,
+                    name: sale.product_name,
+                    total_amount: sale.total_amount,
+                    quantity: sale.quantity
+                }));
+
+                sales.forEach(sale => {
+                    const product = products.find(p => p.product_id === sale.product_id);
+                    if (product) {
+                        if (!productPerformance[product.name]) {
+                            productPerformance[product.name] = {
+                                totalSales: 0,
+                                totalQuantity: 0,
+                                totalRevenue: 0,
+                                averagePrice: 0,
+                                saleCount: 0
+                            };
+                        }
+                        productPerformance[product.name].totalSales += sale.total_amount;
+                        productPerformance[product.name].totalQuantity += sale.quantity;
+                        productPerformance[product.name].totalRevenue += sale.total_amount;
+                        productPerformance[product.name].saleCount++;
+                    }
+                });
+
+                // Calculate averages and get top 5 products
+                const topProducts = Object.entries(productPerformance)
+                    .map(([name, data]) => ({
+                        name,
+                        ...data,
+                        averagePrice: data.totalRevenue / data.totalQuantity || 0
+                    }))
+                    .sort((a, b) => b.totalRevenue - a.totalRevenue)
+                    .slice(0, 5);
+
+                // Normalize the data for radar chart
+                const maxValues = {
+                    totalSales: Math.max(...topProducts.map(p => p.totalSales)),
+                    totalQuantity: Math.max(...topProducts.map(p => p.totalQuantity)),
+                    totalRevenue: Math.max(...topProducts.map(p => p.totalRevenue)),
+                    averagePrice: Math.max(...topProducts.map(p => p.averagePrice)),
+                    saleCount: Math.max(...topProducts.map(p => p.saleCount))
+                };
+
+                const normalizedData = topProducts.map(product => ({
+                    name: product.name,
+                    data: [
+                        (product.totalSales / maxValues.totalSales) * 100,
+                        (product.totalQuantity / maxValues.totalQuantity) * 100,
+                        (product.totalRevenue / maxValues.totalRevenue) * 100,
+                        (product.averagePrice / maxValues.averagePrice) * 100,
+                        (product.saleCount / maxValues.saleCount) * 100
+                    ]
+                }));
+
+                // Create radar chart
+                charts['productPerformanceChart'] = new Chart(performanceCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: [
+                            'Total Sales',
+                            'Quantity Sold',
+                            'Revenue',
+                            'Average Price',
+                            'Number of Sales'
+                        ],
+                        datasets: normalizedData.map((product, index) => ({
+                            label: product.name,
+                            data: product.data,
+                            backgroundColor: `rgba(${54 + index * 40}, ${162 - index * 20}, ${235 - index * 30}, 0.2)`,
+                            borderColor: `rgb(${54 + index * 40}, ${162 - index * 20}, ${235 - index * 30})`,
+                            pointBackgroundColor: `rgb(${54 + index * 40}, ${162 - index * 20}, ${235 - index * 30})`,
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: `rgb(${54 + index * 40}, ${162 - index * 20}, ${235 - index * 30})`
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 0
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    stepSize: 20,
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                },
+                                pointLabels: {
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Top 5 Products Performance Comparison',
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.dataset.label || '';
+                                        const value = context.raw || 0;
+                                        const metric = context.label;
+                                        const product = topProducts.find(p => p.name === label);
+                                        
+                                        let actualValue = '';
+                                        switch(metric) {
+                                            case 'Total Sales':
+                                                actualValue = `₱${product.totalSales.toFixed(2)}`;
+                                                break;
+                                            case 'Quantity Sold':
+                                                actualValue = product.totalQuantity;
+                                                break;
+                                            case 'Revenue':
+                                                actualValue = `₱${product.totalRevenue.toFixed(2)}`;
+                                                break;
+                                            case 'Average Price':
+                                                actualValue = `₱${product.averagePrice.toFixed(2)}`;
+                                                break;
+                                            case 'Number of Sales':
+                                                actualValue = product.saleCount;
+                                                break;
+                                        }
+                                        
+                                        return `${label}: ${actualValue} (${value.toFixed(1)}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                showError('Error loading sales data. Please try again later.');
+                console.error('Error:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Fetch and display inventory data
+        async function fetchInventoryData() {
+            showLoading();
+            try {
+                const [productsResponse, salesResponse] = await Promise.all([
+                    fetch(`${API_URL}/products`),
+                    fetch(`${API_URL}/sales`)
+                ]);
+
+                if (!productsResponse.ok || !salesResponse.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+
+                const productsData = await productsResponse.json();
+                const salesData = await salesResponse.json();
+
+                if (!productsData.success || !salesData.success) {
+                    throw new Error('Failed to fetch data');
+                }
+
+                const products = productsData.data || [];
+                const sales = salesData.data || [];
+                
+                // Destroy existing charts
+                destroyChart('inventoryValueChart');
+                destroyChart('categoryDistributionChart');
+                
+                // Inventory Value Chart
+                const valueCtx = document.getElementById('inventoryValueChart').getContext('2d');
+                charts['inventoryValueChart'] = new Chart(valueCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: products.map(item => item.name),
+                        datasets: [{
+                            label: 'Inventory Value',
+                            data: products.map(item => (item.quantity || 0) * (item.price || 0)),
+                            backgroundColor: 'rgba(153, 102, 255, 0.5)',
+                            borderColor: 'rgb(153, 102, 255)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Value'
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Inventory Value Distribution'
+                            }
+                        }
+                    }
+                });
+
+                // Category Distribution Chart with Sales Data
+                const categoryCtx = document.getElementById('categoryDistributionChart').getContext('2d');
+                
+                // Group sales by category
+                const categorySales = {};
+                sales.forEach(sale => {
+                    const product = products.find(p => p.product_id === sale.product_id);
+                    if (product) {
+                        if (!categorySales[product.category]) {
+                            categorySales[product.category] = {
+                                revenue: 0,
+                                quantity: 0
+                            };
+                        }
+                        categorySales[product.category].revenue += sale.total_amount;
+                        categorySales[product.category].quantity += sale.quantity;
+                    }
+                });
+
+                const categories = Object.keys(categorySales);
+                const categoryData = categories.map(category => ({
+                    category,
+                    revenue: categorySales[category].revenue,
+                    quantity: categorySales[category].quantity
+                }));
+
+                // Format the data for the chart
+                const chartData = {
+                    labels: categoryData.map(item => `${item.category} (${item.quantity} units)`),
+                    datasets: [{
+                        data: categoryData.map(item => item.revenue),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)',
+                            'rgba(153, 102, 255, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 206, 86)',
+                            'rgb(75, 192, 192)',
+                            'rgb(153, 102, 255)'
+                        ],
+                        borderWidth: 1
+                    }]
+                };
+
+                charts['categoryDistributionChart'] = new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Sales Distribution by Category'
+                            },
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    generateLabels: function(chart) {
+                                        const data = chart.data;
+                                        return data.labels.map((label, i) => ({
+                                            text: `${label} - $${Number(data.datasets[0].data[i]).toFixed(2)}`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            strokeStyle: data.datasets[0].borderColor[i],
+                                            lineWidth: 1
+                                        }));
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        return `${label}: $${Number(value).toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                showError('Error loading inventory data. Please try again later.');
+                console.error('Error:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Fetch and display low stock data
+        async function fetchLowStockData() {
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}/products/low-stock`);
+                if (!response.ok) throw new Error('Failed to fetch low stock data');
+                const responseData = await response.json();
+                
+                // Destroy existing charts
+                destroyChart('lowStockAlertChart');
+                destroyChart('stockReorderComparisonChart');
+                
+                // Low Stock Alert Chart
+                const alertCtx = document.getElementById('lowStockAlertChart').getContext('2d');
+                charts['lowStockAlertChart'] = new Chart(alertCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: responseData.data.map(item => item.name),
+                        datasets: [{
+                            label: 'Current Stock',
+                            data: responseData.data.map(item => item.stock),
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgb(255, 99, 132)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                // Stock vs Reorder Level Chart
+                const comparisonCtx = document.getElementById('stockReorderComparisonChart').getContext('2d');
+                charts['stockReorderComparisonChart'] = new Chart(comparisonCtx, {
+                    type: 'line',
+                    data: {
+                        labels: responseData.data.map(item => item.name),
+                        datasets: [{
+                            label: 'Current Stock',
+                            data: responseData.data.map(item => item.stock),
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        }, {
+                            label: 'Reorder Level',
+                            data: responseData.data.map(item => item.reorder_level),
+                            borderColor: 'rgb(255, 99, 132)',
+                            borderDash: [5, 5],
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                showError('Error loading low stock data. Please try again later.');
+                console.error('Error:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Fetch and display reorder data
+        async function fetchReorderData() {
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}/products/low-stock`);
+                if (!response.ok) throw new Error('Failed to fetch reorder data');
+                const responseData = await response.json();
+                
+                // Destroy existing charts
+                destroyChart('reorderTimelineChart');
+                destroyChart('reorderPriorityChart');
+                
+                // Reorder Timeline Chart
+                const timelineCtx = document.getElementById('reorderTimelineChart').getContext('2d');
+                charts['reorderTimelineChart'] = new Chart(timelineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: responseData.data.map(item => item.name),
+                        datasets: [{
+                            label: 'Days Until Reorder',
+                            data: responseData.data.map(item => 
+                                Math.ceil((item.stock / item.daily_usage) || 0)
+                            ),
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                // Reorder Priority Chart
+                const priorityCtx = document.getElementById('reorderPriorityChart').getContext('2d');
+                const priorityData = responseData.data
+                    .map(item => ({
+                        name: item.name,
+                        priority: (item.reorder_level - item.stock) / item.reorder_level
+                    }))
+                    .sort((a, b) => b.priority - a.priority);
+
+                charts['reorderPriorityChart'] = new Chart(priorityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: priorityData.map(item => item.name),
+                        datasets: [{
+                            label: 'Reorder Priority',
+                            data: priorityData.map(item => item.priority),
+                            backgroundColor: 'rgba(255, 159, 64, 0.5)',
+                            borderColor: 'rgb(255, 159, 64)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 1
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                showError('Error loading reorder data. Please try again later.');
+                console.error('Error:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Fetch and display metrics data
+        async function fetchMetricsData() {
+            showLoading();
+            try {
+                // Fetch sales metrics
+                const salesResponse = await fetch(`${API_URL}/sales/metrics`);
+                if (!salesResponse.ok) throw new Error('Failed to fetch sales metrics');
+                const salesData = await salesResponse.json();
+                
+                if (!salesData.success) {
+                    throw new Error(salesData.message || 'Failed to fetch sales metrics');
+                }
+
+                // Update total revenue with proper formatting
+                const totalRevenueElement = document.getElementById('totalRevenue');
+                if (totalRevenueElement) {
+                    const formattedRevenue = new Intl.NumberFormat('en-PH', {
+                        style: 'currency',
+                        currency: 'PHP',
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(salesData.data.total_revenue || 0);
+                    
+                    totalRevenueElement.textContent = formattedRevenue;
+                }
+
+                // Update total quantity
+                const totalQuantityElement = document.getElementById('totalQuantity');
+                if (totalQuantityElement) {
+                    totalQuantityElement.textContent = salesData.data.total_units_sold || 0;
+                }
+
+                // Fetch trending products
+                const trendingResponse = await fetch(`${API_URL}/sales/trending`);
+                if (!trendingResponse.ok) throw new Error('Failed to fetch trending products');
+                const trendingData = await trendingResponse.json();
+                
+                if (trendingData.success && trendingData.data.length > 0) {
+                    const trendingProductElement = document.getElementById('trendingProduct');
+                    if (trendingProductElement) {
+                        trendingProductElement.textContent = trendingData.data[0].product_name || '-';
+                    }
+                }
+            } catch (error) {
+                showError('Error loading metrics data. Please try again later.');
+                console.error('Error:', error);
+                
+                // Set default values in case of error
+                document.getElementById('totalRevenue').textContent = '₱0.00';
+                document.getElementById('totalQuantity').textContent = '0';
+                document.getElementById('trendingProduct').textContent = '-';
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchMetricsData();
+            showSection('line-chart'); // Show initial section
+        });
+
+        // Toggle sidebar function
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (window.innerWidth < 768) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+                document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : '';
+            }
+        }
+
+        // Close sidebar when clicking overlay
+        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+            toggleSidebar();
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Update menuToggle event listener
+        document.getElementById('menuToggle').addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleSidebar();
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            if (window.innerWidth < 768 && 
+                !sidebar.contains(event.target) && 
+                !menuToggle.contains(event.target) &&
+                sidebar.classList.contains('show')) {
+                toggleSidebar();
+            }
+        });
+    </script>
+</body>
+</html>
+<style>
+    .nav button.active {
+        background-color: #e9ecef;
+        color: #0d6efd;
+    }
+    
+    .section {
+        transition: opacity 0.3s ease-in-out;
+    }
+    
+    .section:not(.d-none) {
+        opacity: 1;
+    }
+</style>
