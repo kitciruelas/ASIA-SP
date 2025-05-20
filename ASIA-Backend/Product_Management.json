@@ -1,0 +1,640 @@
+{
+	"info": {
+		"_postman_id": "12345678-abcd-1234-efgh-123456789abc",
+		"name": "Product Management API",
+		"description": "A collection for testing the Product Management REST API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Get All Products",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/products",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Product By ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/products/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Low Stock Products",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/products/low-stock",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"low-stock"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Product Inventory",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/inventory",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"inventory"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Product Sales",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/sales",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"sales"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Product Sales Trends",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/sales-trends",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"sales-trends"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Smartphone X\",\n  \"sku\": \"SP-X-001\",\n  \"description\": \"Latest smartphone with advanced features\",\n  \"category\": \"Electronics\",\n  \"price\": 799.99\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					}
+				},
+				{
+					"name": "Record Sale",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"product_id\": 1,\n  \"quantity\": 2,\n  \"total_amount\": 1599.98,\n  \"sale_date\": \"2023-11-15\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/record-sale",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"record-sale"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Smartphone X Pro\",\n  \"sku\": \"SP-X-001\",\n  \"description\": \"Updated smartphone with premium features\",\n  \"category\": \"Electronics\",\n  \"price\": 899.99\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Product Inventory",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 50,\n  \"reorder_level\": 10\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/inventory",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"inventory"
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "http://localhost:5000/api/products/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"3"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Inventory",
+			"item": [
+				{
+					"name": "Get All Inventory",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/inventory",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"inventory"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Low Stock Inventory",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/inventory/low-stock",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"inventory",
+								"low-stock"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Inventory By ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/inventory/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"inventory",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Inventory",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"product_id\": 2,\n  \"quantity\": 100,\n  \"reorder_level\": 20\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/inventory",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"inventory"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Inventory",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 75,\n  \"reorder_level\": 15\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/inventory/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"inventory",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Inventory By Product ID",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 60,\n  \"reorder_level\": 12\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/inventory/product/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"inventory",
+								"product",
+								"2"
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Inventory",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "http://localhost:5000/api/inventory/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"inventory",
+								"3"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Sales",
+			"item": [
+				{
+					"name": "Get All Sales",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/sales",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"sales"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Sale By ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/sales/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"sales",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Sales By Product",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/sales/by-product/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"sales",
+								"by-product",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Sales By Date Range",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/sales/by-date?startDate=2023-01-01&endDate=2023-12-31",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"sales",
+								"by-date"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2023-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2023-12-31"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Sales Summary By Product",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/sales/summary/by-product",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"sales",
+								"summary",
+								"by-product"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Monthly Sales Summary",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:5000/api/sales/summary/monthly",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"sales",
+								"summary",
+								"monthly"
+							]
+						}
+					}
+				},
+				{
+					"name": "Record Sale",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"product_id\": 1,\n  \"quantity\": 3,\n  \"total_amount\": 2699.97,\n  \"sale_date\": \"2023-11-16\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/sales",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"sales"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Sale",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 4,\n  \"total_amount\": 3599.96,\n  \"sale_date\": \"2023-11-16\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/sales/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"sales",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Sale",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "http://localhost:5000/api/sales/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"sales",
+								"3"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}
