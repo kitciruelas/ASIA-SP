@@ -1087,23 +1087,23 @@
                 const trendingData = await trendingResponse.json();
                 
                 if (trendingData.success && trendingData.data.length > 0) {
-                    const trendingProductElement = document.getElementById('trendingProduct');
-                    if (trendingProductElement) {
+        const trendingProductElement = document.getElementById('trendingProduct');
+        if (trendingProductElement) {
                         trendingProductElement.textContent = trendingData.data[0].product_name || '-';
-                    }
-                }
-            } catch (error) {
-                showError('Error loading metrics data. Please try again later.');
-                console.error('Error:', error);
-                
-                // Set default values in case of error
-                document.getElementById('totalRevenue').textContent = '₱0.00';
-                document.getElementById('totalQuantity').textContent = '0';
-                document.getElementById('trendingProduct').textContent = '-';
-            } finally {
-                hideLoading();
-            }
         }
+                }
+    } catch (error) {
+        showError('Error loading metrics data. Please try again later.');
+        console.error('Error:', error);
+        
+        // Set default values in case of error
+        document.getElementById('totalRevenue').textContent = '₱0.00';
+        document.getElementById('totalQuantity').textContent = '0';
+        document.getElementById('trendingProduct').textContent = '-';
+    } finally {
+        hideLoading();
+    }
+}
 
         // Initial load
         document.addEventListener('DOMContentLoaded', () => {
@@ -1131,35 +1131,35 @@
 
         // Handle window resize
         window.addEventListener('resize', function() {
-            const sidebar = document.getElementById('sidebar');
+    const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             const mainContent = document.querySelector('.main-content');
             
             if (window.innerWidth >= 768) {
-                sidebar.classList.remove('show');
+            sidebar.classList.remove('show');
                 overlay.classList.remove('show');
                 document.body.style.overflow = '';
             }
         });
 
-        // Update menuToggle event listener
-        document.getElementById('menuToggle').addEventListener('click', function(e) {
-            e.stopPropagation();
-            toggleSidebar();
-        });
+// Update menuToggle event listener
+document.getElementById('menuToggle').addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggleSidebar();
+});
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const menuToggle = document.getElementById('menuToggle');
-            
-            if (window.innerWidth < 768 && 
-                !sidebar.contains(event.target) && 
-                !menuToggle.contains(event.target) &&
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(event) {
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    
+    if (window.innerWidth < 768 && 
+        !sidebar.contains(event.target) && 
+        !menuToggle.contains(event.target) &&
                 sidebar.classList.contains('show')) {
-                toggleSidebar();
-            }
-        });
+        toggleSidebar();
+    }
+});
     </script>
 </body>
 </html>

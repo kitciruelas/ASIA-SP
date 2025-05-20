@@ -6,11 +6,11 @@ A comprehensive product analytics dashboard that provides real-time insights int
 
 The ASIA Product Analytics Dashboard is a web-based application that helps businesses track and analyze their product performance through various visualizations including:
 
-- Total Revenue and Sales Metrics
-- Stock Distribution Analysis
-- Sales Trends and Patterns
-- Product Performance Metrics
-- Inventory Status and Alerts
+- Total Revenue and Sales Metrics (Line Chart)
+- Stock Distribution Analysis (Bar Chart)
+- Sales Trends and Patterns (Line Chart)
+- Product Performance Metrics (Radar Chart)
+- Inventory Status and Alerts (Doughnut Chart)
 
 ## Tech Stack
 
@@ -88,7 +88,6 @@ npm install
 cd ASIA-Backend
 npm start
 ```
-
 2. Start the frontend:
 ```bash
 cd src
