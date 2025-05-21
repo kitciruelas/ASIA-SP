@@ -30,8 +30,8 @@ The ASIA Product Analytics Dashboard is a web-based application that helps busin
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/ASIA.git
-cd ASIA
+git clone https://github.com/y/ASIA-SP.git
+cd ASIA-SP
 ```
 
 2. Install backend dependencies:
@@ -44,42 +44,54 @@ npm install
 - Create a MySQL database named `product_sales_db`
 - Import the database schema from `database/product_sales_db.sql`
 
-4. Configure environment variables:
-- Create a `.env` file in the ASIA-Backend directory
-- Add the following configuration:
-```env
-DB_HOST=localhost
-DB_USER=your_username
-DB_PASSWORD=your_password
-DB_NAME=asia_db
-PORT=5000
-```
+5. Run the server:
+- npm run dev
 
-5. Install frontend dependencies:
-```bash
-cd ../src
-npm install
-```
+## Testing API Endpoints
+- Use Postman to test API endpoints
+1. Download Postman from this link https://www.postman.com/downloads/
+2. Install and launch the app
+3. Create new HTTP Request.
+4. Set the HTTP method (GET, POST, PUT, DELETE, etc.).
+5. Enter the API URL (e.g., http://localhost:5000/api/sales).
+6. Then click the Send and analyze the response
 
-## API Endpoints
+## API Endpoints Used in Dashboard
 
-### Products
-- `GET /api/products` - Get all products with inventory data (Used by Stock Distribution Bar Chart and Stock Status Doughnut Chart)
-- `GET /api/products/:id` - Get a specific product
-- `GET /api/products/low-stock` - Get products with low stock
-- `POST /api/products` - Create a new product
-- `PUT /api/products/:id` - Update a product
-- `DELETE /api/products/:id` - Delete a product
+### Charts and Metrics Endpoints
 
-### Sales
-- `GET /api/sales` - Get all sales records (Used by Monthly Sales Line Chart and Product Performance Radar Chart)
-- `GET /api/sales/metrics` - Get sales metrics (total revenue, quantity) (Used by Overall Dashboard Metrics: Total Revenue and Total Quantity Sold)
-- `GET /api/sales/trending` - Get trending products (Used by Overall Dashboard Metrics: Trending Product)
-- `POST /api/sales` - Record a new sale
+1. **Line Chart - Sales Amount**
+   - Endpoint: `GET /api/products/:id/sales-trends`
+   - Used for: Displaying sales trends for specific products
 
-### Inventory
-- `GET /api/inventory` - Get all inventory records
-- `PUT /api/inventory/:id` - Update inventory for a product
+2. **Bar Chart - Top 20 Products Stock**
+   - Endpoint: `GET /api/products/top-stocked`
+   - Used for: Showing top 20 products by stock level
+
+3. **Doughnut Chart - Stock Level Distribution**
+   - Endpoint: `GET /api/products/stock-classification-summary`
+   - Used for: Displaying stock level distribution
+
+4. **Radar Chart - Top 5 Products Performance**
+   - Endpoint: `GET /api/sales/performance`
+   - Used for: Showing performance comparison of exactly 5 top products by revenue
+
+5. **Total Revenue**
+   - Endpoint: `GET /api/sales/metrics/revenue`
+   - Used for: Displaying total revenue metrics
+
+6. **Total Quantity Sold**
+   - Endpoint: `GET /api/sales/metrics/quantitysold`
+   - Used for: Displaying total quantity sold metrics
+
+7. **Trending Product**
+   - Endpoint: `GET /api/sales/trending`
+   - Used for: Showing trending products
+
+## Group Members
+- Abrenica, Sharmaine
+- Alisuag, Clark
+- Ciruelas, Keith Andrei
 
 ## Running the Project
 
@@ -87,16 +99,19 @@ npm install
 ```bash
 cd ASIA-Backend
 npm start
+or
+npm run dev "server.js"
 ```
 2. Start the frontend:
 ```bash
 cd src
+or Live Server and click src http://your_localhost:5500/src/
 # If using a local server like XAMPP, place the src folder in htdocs
 # Or use any static file server
 ```
 
 3. Access the dashboard:
-- Open your browser and navigate to `http://localhost/ASIA/src`
+- Open your browser and navigate to `http://localhost:5500/src/index.html`
 - Or if using a different port: `http://localhost:your_port`
 
 ## Features
@@ -104,7 +119,7 @@ cd src
 ### Dashboard Metrics
 - Total Revenue Display
 - Total Quantity Sold
-- Trending Product Highlight
+-  Highlight Trending Product
 
 ### Charts and Visualizations
 1. Line Chart

@@ -8,6 +8,12 @@ router.get('/', productController.getAllProducts);
 // GET /api/products/low-stock - Get products with low stock
 router.get('/low-stock', productController.getLowStockProducts);
 
+// GET /api/products/top-stocked - Get top 20 products by stock level
+router.get('/top-stocked', productController.getTopStockedProducts);
+
+//GET /api/products/stock-classification-summary - Get Stock Level Distribution
+router.get('/stock-classification-summary', productController.getStockClassificationSummary);
+
 // GET /api/products/:id - Get a single product
 router.get('/:id', productController.getProductById);
 

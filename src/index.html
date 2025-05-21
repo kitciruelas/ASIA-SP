@@ -547,10 +547,18 @@
         async function fetchSalesData() {
             showLoading();
             try {
-                const response = await fetch(`${API_URL}/sales`);
-                if (!response.ok) throw new Error('Failed to fetch sales data');
-                const responseData = await response.json();
-                
+                // Fetch data for Line Chart
+                const salesResponse = await fetch(`${API_URL}/sales`);
+                if (!salesResponse.ok) throw new Error('Failed to fetch sales data');
+                const salesData = await salesResponse.json();
+
+                // Fetch data for Radar Chart (Top 5 Products Performance)
+                const performanceResponse = await fetch(`${API_URL}/sales/performance`);
+                if (!performanceResponse.ok) throw new Error('Failed to fetch performance data');
+                const performanceData = await performanceResponse.json();
+
+                console.log('Performance data received:', performanceData.data);
+
                 // Destroy existing charts
                 destroyChart('monthlySalesChart');
                 destroyChart('productPerformanceChart');
@@ -560,10 +568,10 @@
                 charts['monthlySalesChart'] = new Chart(monthlyCtx, {
                     type: 'line',
                     data: {
-                        labels: responseData.data.map(sale => new Date(sale.sale_date).toLocaleDateString()),
+                        labels: salesData.data.map(sale => new Date(sale.sale_date).toLocaleDateString()),
                         datasets: [{
                             label: 'Sales Amount',
-                            data: responseData.data.map(sale => sale.total_amount),
+                            data: salesData.data.map(sale => sale.total_amount),
                             borderColor: 'rgb(75, 192, 192)',
                             tension: 0.1
                         }]
@@ -579,65 +587,28 @@
                     }
                 });
 
-                // Product Performance Chart
+                // Product Performance Chart (Radar Chart)
                 const performanceCtx = document.getElementById('productPerformanceChart').getContext('2d');
 
-                // Process and aggregate sales data for radar chart
-                const productPerformance = {};
-                const sales = responseData.data || [];
-                const products = responseData.data.map(sale => ({
-                    product_id: sale.product_id,
-                    name: sale.product_name,
-                    total_amount: sale.total_amount,
-                    quantity: sale.quantity
-                }));
+                const topProducts = performanceData.data || []; // Use data directly from the performance endpoint
 
-                sales.forEach(sale => {
-                    const product = products.find(p => p.product_id === sale.product_id);
-                    if (product) {
-                        if (!productPerformance[product.name]) {
-                            productPerformance[product.name] = {
-                                totalSales: 0,
-                                totalQuantity: 0,
-                                totalRevenue: 0,
-                                averagePrice: 0,
-                                saleCount: 0
-                            };
-                        }
-                        productPerformance[product.name].totalSales += sale.total_amount;
-                        productPerformance[product.name].totalQuantity += sale.quantity;
-                        productPerformance[product.name].totalRevenue += sale.total_amount;
-                        productPerformance[product.name].saleCount++;
-                    }
-                });
-
-                // Calculate averages and get top 5 products
-                const topProducts = Object.entries(productPerformance)
-                    .map(([name, data]) => ({
-                        name,
-                        ...data,
-                        averagePrice: data.totalRevenue / data.totalQuantity || 0
-                    }))
-                    .sort((a, b) => b.totalRevenue - a.totalRevenue)
-                    .slice(0, 5);
-
-                // Normalize the data for radar chart
+                // Normalize the data for radar chart (still needed as backend returns raw values)
                 const maxValues = {
-                    totalSales: Math.max(...topProducts.map(p => p.totalSales)),
-                    totalQuantity: Math.max(...topProducts.map(p => p.totalQuantity)),
-                    totalRevenue: Math.max(...topProducts.map(p => p.totalRevenue)),
-                    averagePrice: Math.max(...topProducts.map(p => p.averagePrice)),
-                    saleCount: Math.max(...topProducts.map(p => p.saleCount))
+                    total_units_sold: Math.max(...topProducts.map(p => p.total_units_sold)),
+                    total_revenue: Math.max(...topProducts.map(p => p.total_revenue)),
+                    average_sale_value: Math.max(...topProducts.map(p => p.average_sale_value)),
+                    highest_sale: Math.max(...topProducts.map(p => p.highest_sale || 0)),
+                    lowest_sale: Math.max(...topProducts.map(p => p.lowest_sale || 0))
                 };
 
                 const normalizedData = topProducts.map(product => ({
-                    name: product.name,
+                    name: product.product_name,
                     data: [
-                        (product.totalSales / maxValues.totalSales) * 100,
-                        (product.totalQuantity / maxValues.totalQuantity) * 100,
-                        (product.totalRevenue / maxValues.totalRevenue) * 100,
-                        (product.averagePrice / maxValues.averagePrice) * 100,
-                        (product.saleCount / maxValues.saleCount) * 100
+                        (product.total_revenue / maxValues.total_revenue) * 100, // Total Sales
+                        (product.total_units_sold / maxValues.total_units_sold) * 100, // Quantity Sold
+                        (product.average_sale_value / maxValues.average_sale_value) * 100, // Average Price
+                        (product.highest_sale / maxValues.highest_sale) * 100, // Highest Sale
+                        (product.lowest_sale / maxValues.lowest_sale) * 100 // Lowest Sale
                     ]
                 }));
 
@@ -648,9 +619,9 @@
                         labels: [
                             'Total Sales',
                             'Quantity Sold',
-                            'Revenue',
                             'Average Price',
-                            'Number of Sales'
+                            'Highest Sale',
+                            'Lowest Sale'
                         ],
                         datasets: normalizedData.map((product, index) => ({
                             label: product.name,
@@ -686,57 +657,49 @@
                                 }
                             }
                         },
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Top 5 Products Performance Comparison',
-                                font: {
-                                    size: 16
-                                }
-                            },
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    boxWidth: 12,
-                                    padding: 15
-                                }
-                            },
+                         plugins: {
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
                                         const label = context.dataset.label || '';
-                                        const value = context.raw || 0;
-                                        const metric = context.label;
-                                        const product = topProducts.find(p => p.name === label);
+                                        const metricLabel = context.label || '';
+                                        const normalizedValue = context.raw || 0;
                                         
-                                        let actualValue = '';
-                                        switch(metric) {
-                                            case 'Total Sales':
-                                                actualValue = `₱${product.totalSales.toFixed(2)}`;
-                                                break;
-                                            case 'Quantity Sold':
-                                                actualValue = product.totalQuantity;
-                                                break;
-                                            case 'Revenue':
-                                                actualValue = `₱${product.totalRevenue.toFixed(2)}`;
-                                                break;
-                                            case 'Average Price':
-                                                actualValue = `₱${product.averagePrice.toFixed(2)}`;
-                                                break;
-                                            case 'Number of Sales':
-                                                actualValue = product.saleCount;
-                                                break;
+                                        // Find the raw value for the specific metric and product
+                                        const productData = topProducts.find(p => p.product_name === label);
+                                        let rawValue = 'N/A';
+                                        if (productData) {
+                                             switch (metricLabel) {
+                                                case 'Total Sales':
+                                                    rawValue = productData.total_revenue.toFixed(2);
+                                                    break;
+                                                case 'Quantity Sold':
+                                                    rawValue = productData.total_units_sold;
+                                                    break;
+                                                case 'Average Price':
+                                                     rawValue = productData.average_sale_value.toFixed(2); // Format to 2 decimal places
+                                                     break;
+                                                case 'Highest Sale':
+                                                     rawValue = productData.highest_sale.toFixed(2);
+                                                     break;
+                                                case 'Lowest Sale':
+                                                     rawValue = productData.lowest_sale.toFixed(2);
+                                                     break;
+                                            }
                                         }
                                         
-                                        return `${label}: ${actualValue} (${value.toFixed(1)}%)`;
+                                        return `${label} - ${metricLabel}: ${rawValue} (${normalizedValue.toFixed(1)}%)`;
                                     }
                                 }
                             }
                         }
                     }
                 });
+
+                console.log('Radar chart created');
+
             } catch (error) {
-                showError('Error loading sales data. Please try again later.');
+                showError('Error loading sales or performance data. Please try again later.');
                 console.error('Error:', error);
             } finally {
                 hideLoading();

@@ -159,6 +159,78 @@ exports.getMonthlySalesSummary = async (req, res, next) => {
     }
 };
 
+//Get Sales Performance
+exports.getSalesPerformance = async (req, res, next) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT 
+                p.product_id,
+                p.name as product_name,
+                p.sku,
+                SUM(s.quantity) as total_units_sold,
+                SUM(s.total_amount) as total_revenue,
+                AVG(s.total_amount) as average_sale_value,
+                MAX(s.total_amount) as highest_sale,
+                MIN(s.total_amount) as lowest_sale
+            FROM sales s
+            JOIN products p ON s.product_id = p.product_id
+            GROUP BY p.product_id
+            ORDER BY total_revenue DESC
+            LIMIT 5
+        `);
+
+        res.status(200).json({
+            success: true,
+            data: rows
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+//Get Revenue Matrics
+exports.getRevenueMetrics = async (req, res, next) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT 
+                SUM(total_amount) as total_revenue,
+                AVG(total_amount) as average_revenue,
+                MAX(total_amount) as max_revenue,
+                MIN(total_amount) as min_revenue
+            FROM sales
+        `);
+
+        res.status(200).json({
+            success: true,
+            data: rows[0]
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+//Get Sold Metrics
+exports.getQuantitySoldMetrics = async (req, res, next) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT 
+                SUM(quantity) as total_quantity_sold,
+                AVG(quantity) as average_quantity_sold,
+                MAX(quantity) as max_quantity_sold,
+                MIN(quantity) as min_quantity_sold
+            FROM sales
+        `);
+
+        res.status(200).json({
+            success: true,
+            data: rows[0]
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 // Record a new sale
 exports.recordSale = async (req, res, next) => {
     try {

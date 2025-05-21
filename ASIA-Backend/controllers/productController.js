@@ -22,6 +22,106 @@ exports.getAllProducts = async (req, res, next) => {
     }
 };
 
+// Get top 20 products by stock level with classification
+exports.getTopStockedProducts = async (req, res, next) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT p.*, COALESCE(i.quantity, 0) as quantity
+            FROM products p
+            LEFT JOIN inventory i ON p.product_id = i.product_id
+            ORDER BY i.quantity DESC
+            LIMIT 20
+        `);
+
+        // Classify stock levels
+        const classifiedData = rows.map(product => {
+            let stockClassification = '';
+
+            const quantity = product.quantity;
+
+            if (quantity === 0) {
+                stockClassification = 'Out of Stock';
+            } else if (quantity >= 1 && quantity <= 10) {
+                stockClassification = 'Low Stock';
+            } else if (quantity >= 11 && quantity <= 50) {
+                stockClassification = 'Medium Stock';
+            } else if (quantity >= 51 && quantity <= 100) {
+                stockClassification = 'High Stock';
+            } else {
+                stockClassification = 'Very High Stock';
+            }
+
+            return {
+                ...product,
+                stockClassification
+            };
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Top 20 products by stock level retrieved successfully',
+            data: classifiedData
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving top stocked products',
+            error: error.message
+        });
+    }
+};
+
+// Get stock level classification summary
+exports.getStockClassificationSummary = async (req, res, next) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT COALESCE(i.quantity, 0) AS quantity
+            FROM products p
+            LEFT JOIN inventory i ON p.product_id = i.product_id
+        `);
+
+        // Initialize classification counters
+        const stockRanges = {
+            'Out of Stock (0)': 0,
+            'Low Stock (1-10)': 0,
+            'Medium Stock (11-50)': 0,
+            'High Stock (51-100)': 0,
+            'Very High Stock (>100)': 0
+        };
+
+        // Classify each product
+        rows.forEach(row => {
+            const quantity = row.quantity;
+
+            if (quantity === 0) {
+                stockRanges['Out of Stock (0)']++;
+            } else if (quantity >= 1 && quantity <= 10) {
+                stockRanges['Low Stock (1-10)']++;
+            } else if (quantity >= 11 && quantity <= 50) {
+                stockRanges['Medium Stock (11-50)']++;
+            } else if (quantity >= 51 && quantity <= 100) {
+                stockRanges['High Stock (51-100)']++;
+            } else {
+                stockRanges['Very High Stock (>100)']++;
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Stock classification summary retrieved successfully',
+            data: stockRanges
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving stock classification summary',
+            error: error.message
+        });
+    }
+};
+
+
 // Get a single product by ID
 exports.getProductById = async (req, res, next) => {
     try {
